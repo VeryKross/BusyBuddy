@@ -3,7 +3,7 @@ Busy Buddy started off as a fun and extensible project that provides a way to vi
 
 That said, a funny thing happened while building Busy Buddy – I was able to make it more generic so that it could be used to indicate the status of pretty much anything you can dream up. It has a simple REST API which accepts a POST that includes a parameter for the status text (“Free”, “Busy”, etc.), as well as a parameter for the color. This means that you can send a simple POST message to Busy Buddy to, for example, indicate that your DevOps build pipeline passed or failed, or that your garage door was left open, or pretty much anything along those lines. All the text is configurable, as well as the LED colors, and you can do that without ever having to modify and compile the source code.
 
-You'll find all the build and setup instructions in the BusyBuddy_v1_Build.pdf file located in the v1 folder.
+The full build and setup instructions, bill of materials and other info can be found in a PDF document in the version (v1) folder. This covers both source and compiled bin options so if you really don't want to get into compiling stuff and just want a working Busy Buddy, that's an option too!
 
 Busy Buddy is a DIY project intended for educational and personal use only. It is not intended for commercial use or to be relied upon for any professional or medical purposes. The creators and contributors of Busy Buddy are not responsible for any damages or injuries that may result from the use of this project. By using the Busy Buddy software and/or hardware plans, you acknowledge that you understand and assume all risks associated with its use. Please use caution and common sense when working on any DIY project.
 
