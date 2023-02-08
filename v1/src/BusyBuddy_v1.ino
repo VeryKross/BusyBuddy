@@ -36,7 +36,7 @@
 #define SCREEN_HEIGHT 64  // OLED display height, in pixels
 #define OLED_RESET -1     // Reset pin # (or -1 if sharing Arduino reset pin)
 
-#define BB_VER 1.0        // Current version of Busy Buddy, displayed at startup
+#define BB_VER 1.1        // Current version of Busy Buddy, displayed at startup
 
 IPAddress local_IP(10,10,10,10);
 IPAddress gateway(10,10,10,1);
@@ -107,6 +107,10 @@ void setup() {
   pinMode(greenLedPin, OUTPUT);
   pinMode(blueLedPin, OUTPUT);
   
+  // Setup and turn off the built-in LED
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+
   EEPROM.begin(sizeof(struct settings) );
   EEPROM.get( 0, user_settings );
 
@@ -224,6 +228,7 @@ int showStatus(String status){
 
 void handlePost() {
 Serial.println("handlePost...");
+  digitalWrite(LED_BUILTIN, LOW); // Signal POST received
 
   String status = "???";
   String color = "#FFFFFF";
@@ -268,6 +273,8 @@ Serial.println("handlePost...");
 
   // Respond to the client
   server.send(200, "application/json", "{}");
+
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 // If using 3 separate LEDs instead of a single RGB LED, think
