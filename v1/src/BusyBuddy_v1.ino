@@ -36,7 +36,7 @@
 #define SCREEN_HEIGHT 64  // OLED display height, in pixels
 #define OLED_RESET -1     // Reset pin # (or -1 if sharing Arduino reset pin)
 
-#define BB_VER 1.1        // Current version of Busy Buddy, displayed at startup
+#define BB_VER 1.5        // Current version of Busy Buddy, displayed at startup
 
 IPAddress local_IP(10,10,10,10);
 IPAddress gateway(10,10,10,1);
@@ -46,7 +46,7 @@ ESP8266WebServer server(80);
 
 // Defaults for configurable values
 String dnsName = "BusyBuddy";
-String statusText = "My status is";
+String headingText = "My status is";
 String padlock = "";
 bool anodeMode = false;
 
@@ -64,7 +64,7 @@ struct settings {
   char ssid[30];        // The SSID of your local WiFi network
   char password[30];    // The password for your WiFi network
   char dnsName[30];     // The DNS name for Busy Buddy on your network
-  char statusText[20];  // The text to show at the top of the status display
+  char headingText[20];  // The text to show at the top of the status display
   bool anodeMode;       // True if using a Common Adode RGB LED
   char padlock[20];     // An optional secret/password/token to lock access to your Busy Buddy (so your friends can't punk you)
 } user_settings = {};
@@ -75,6 +75,14 @@ GFXcanvas1 dispCanvas(SCREEN_WIDTH, SCREEN_HEIGHT);
 const int redLedPin = 14;   // this corresponds to pin D5 on the ESP8266
 const int greenLedPin = 12; // this corresponds to pin D6
 const int blueLedPin = 13;  // this corresponds to pin D7
+
+// Variables to control LED blinking
+unsigned long curMiliCount = 0;
+unsigned long prevMiliCount = 0;
+int blinkInterval = 500;
+String curColor;
+bool blinkLed = false;
+bool blinkOnState = true;
 
 // JSON data buffer
 StaticJsonDocument<250> jsonDocument;
@@ -119,7 +127,7 @@ void setup() {
   } else {
     wifiInitialized = true;
     dnsName = user_settings.dnsName;
-    statusText = user_settings.statusText;
+    headingText = user_settings.headingText;
     anodeMode = user_settings.anodeMode;
     padlock = user_settings.padlock;
   }
@@ -215,15 +223,27 @@ void loop()
     display.println("10.10.10.10");
     display.display();
     askReset = false;
-  }  
+  }
+
+  curMiliCount = millis();
+  if(curMiliCount - prevMiliCount >= blinkInterval && blinkLed){
+    prevMiliCount = curMiliCount;
+    checkBlink();
+  }
 }
 
-int showStatus(String status){
-  Serial.print("status: ");
-  Serial.println(status);
-
-  displayInfo(status);
-  return 1;
+void checkBlink(){
+  blinkOnState = !blinkOnState;
+  int r, g, b;
+  if(blinkOnState){
+    char const *hexColor = curColor.c_str();
+    std::sscanf(hexColor, "%02x%02x%02x", &r, &g, &b);
+  } else {
+    r = 0;
+    g = 0;
+    b = 0;    
+  }
+  showLedStatus(r, g, b);
 }
 
 void handlePost() {
@@ -231,8 +251,9 @@ Serial.println("handlePost...");
   digitalWrite(LED_BUILTIN, LOW); // Signal POST received
 
   String status = "???";
-  String color = "#FFFFFF";
+  String color = "000000";
   String key = "?";
+  String heading = headingText;
   
   showLedStatus(0,0,0);
   
@@ -251,8 +272,22 @@ Serial.println("handlePost...");
 
   if (server.hasArg("color") == true) {
     color = (String)server.arg("color");
+    curColor = color;
   }
 
+  if (server.hasArg("heading") == true){
+    heading = (String)server.arg("heading");
+  }
+
+  blinkLed = false;
+  if (server.hasArg("blink") == true){
+    int blinkRate = server.arg("blink").toInt();
+    if(blinkRate > 0){
+      blinkInterval = blinkRate;      
+    }    
+    blinkLed = true;    
+  }
+  
   String message;
   for (uint8_t i = 0; i < server.args(); i++) { 
     message = " " + server.argName(i) + ": " + server.arg(i);
@@ -268,7 +303,7 @@ Serial.println("handlePost...");
   Serial.print("color: ");
   Serial.println(color);
 
-  displayInfo(status);
+  displayInfo(status, heading);
   showLedStatus(r, g, b);
 
   // Respond to the client
@@ -364,7 +399,7 @@ void handlePortal() {
     strncpy(user_settings.ssid, server.arg("ssid").c_str(), sizeof(user_settings.ssid));
     strncpy(user_settings.password, server.arg("password").c_str(), sizeof(user_settings.password));
     strncpy(user_settings.dnsName, server.arg("dns").c_str(), sizeof(user_settings.dnsName));
-    strncpy(user_settings.statusText, server.arg("status").c_str(), sizeof(user_settings.statusText));
+    strncpy(user_settings.headingText, server.arg("heading").c_str(), sizeof(user_settings.headingText));
     strncpy(user_settings.padlock, server.arg("key").c_str(), sizeof(user_settings.padlock));
     ledType = server.arg("ledType").c_str();
 
@@ -402,7 +437,7 @@ void handlePortal() {
     String ssid = user_settings.ssid;
     String password = user_settings.password;
     String dns = user_settings.dnsName;
-    String status = user_settings.statusText;
+    String heading = user_settings.headingText;
     String key = user_settings.padlock;
     bool anode = user_settings.anodeMode;
 
@@ -411,7 +446,7 @@ void handlePortal() {
       ssid = "";
       password = "";
       dns=dnsName; // Use default startup value
-      status = statusText;
+      heading = headingText;
       key = "";
       anode = false;
     }
@@ -432,7 +467,7 @@ void handlePortal() {
     pg += " app. Here you can also set a custom DNS name for this device - if you have more than one on ";
     pg += " the same network, setting a name that is unique to each device will ensure your";
     pg += " PresenceLight app is talking to the right one. Keep it simple and don't use spaces in the name";
-    pg += " (e.g., BusyBuddy2, BusyBuddy-KR, MyBlinky1, etc.)</p>The Status Text is the";
+    pg += " (e.g., BusyBuddy2, BusyBuddy-KR, MyBlinky1, etc.)</p>The Heading Text is the";
     pg += " message that's displayed on the OLED screen above the status. It can be up to 11 upper-case ";
     pg += " characters (a couple more if lower-case) or can be blank if you don't want it at all. It is";
     pg += " set to 'My status is' by default, but if you're using Busy Buddy for something like a DevOps Build ";
@@ -443,7 +478,7 @@ void handlePortal() {
     pg += "<div class=\"label\"><label for=\"password\">Password: </label></div><div><input id=\"password\" name=\"password\" type=\"password\" value=\"" + password + "\"/></div>";
     pg += "<div class=\"label\"><label for=\"dns\">DNS Name: </label></div><div><input id=\"dns\" name=\"dns\" type=\"text\" value=\"" + dns + "\"/></div>";
     pg += "<h2>Other Settings</h2>";
-    pg += "<div class=\"label\"><label for=\"status\">Status Text: </label></div><div><input id=\"status\" name=\"status\" type=\"text\" value=\"" + status + "\"/></div>";
+    pg += "<div class=\"label\"><label for=\"heading\">Heading Text: </label></div><div><input id=\"heading\" name=\"heading\" type=\"text\" value=\"" + heading + "\"/></div>";
     pg += "<div class=\"label\"><label for=\"key\">Security Key: </label></div><div><input id=\"key\" name=\"key\" type=\"password\" value=\"" + key + "\"/></div>";
     pg += "<div><div class=\"label\"><label for=\"ledType\">RGB LED Type: </label></div><div><select id=\"ledType\" class=\"list1\" name=\"ledType\">";
     if(anode) {
@@ -467,7 +502,7 @@ void handlePortal() {
 
 // Refresh the display with current status
 // Canvas is used in order to avoid any update flickering
-void displayInfo(String status){
+void displayInfo(String status, String heading){
   IPAddress ip = WiFi.localIP();
 
   display.clearDisplay();
@@ -478,7 +513,7 @@ void displayInfo(String status){
   dispCanvas.setTextSize(1);
   dispCanvas.setTextColor(WHITE);
 
-  dispCanvas.print(statusText);
+  dispCanvas.print(heading);
   
   dispCanvas.setCursor(0,45);
   dispCanvas.setTextSize(2);
