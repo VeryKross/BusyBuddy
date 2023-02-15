@@ -8,6 +8,7 @@ The full build and setup instructions, bill of materials and other info can be f
 Busy Buddy is a DIY project intended for educational and personal use only. It is not intended for commercial use or to be relied upon for any professional or medical purposes. The creators and contributors of Busy Buddy are not responsible for any damages or injuries that may result from the use of this project. By using the Busy Buddy software and/or hardware plans, you acknowledge that you understand and assume all risks associated with its use. Please use caution and common sense when working on any DIY project.
 
 ![20230128_211500532_iOS](https://user-images.githubusercontent.com/11561147/215344382-fe648c0e-acdb-42ee-a151-73144be2682b.jpg)
+![20230214_004233884_iOS](https://user-images.githubusercontent.com/11561147/219048958-918e198b-5e9a-44be-9f60-696a0c186781.jpg)
 
 
 ## Links
