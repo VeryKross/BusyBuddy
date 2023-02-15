@@ -7,4 +7,4 @@ can be printed and used to make it easier to get a perfect alignment if needed.
 The Dome component fits over the LED at the top of the tower and glues in place. It is intended to be printed in a clear filament like Clear PETG and
 acts as a defuser for the LED (and looks kinda cool).
 
-![20230214_004332559_iOS](https://user-images.githubusercontent.com/11561147/218615047-d5e00c45-6a92-4251-b12a-a29c66513e5f.jpg)
+<img src="https://user-images.githubusercontent.com/11561147/218615047-d5e00c45-6a92-4251-b12a-a29c66513e5f.jpg" width="500" >
