@@ -384,13 +384,29 @@ void handlePortal() {
 
     // Check to see if we're padlocked and need a key - ignore if not yet initialized.
     if(curKey.length() > 0 && curKey != saveKey && user_settings.initialized == 1){
-      pg = "<!doctype html><html lang=\"en\" style=\"background: linear-gradient(90deg, rgba(36,0,0,1) 0%, rgba(121,9,9,1) 35%, rgba(200,42,42,1) 100%);\">";
-      pg += "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Busy Buddy Setup</title>";
-      pg += "<style>h1 {color: yellow;} h2 {color: cyan;} .label {margin-top: 3px;}</style></head>";
-      pg += "<body style=\"background-color: transparent; color: white;\">";
-      pg += "<h1>Busy Buddy Setup</h1><h3>Setup failed due to security key mismatch.</h3>";
-      pg += "<p>If you've forgotten your Security Key, please re-install the software to force a reset of the key. Press the browser's back button to retry.";
-      pg += "</body></html>";
+      pg = "<!doctype html><html lang=\"en\">";
+      pg += "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Busy Buddy Setup - Error</title>";
+      pg += "<style>";
+      pg += "* { box-sizing: border-box; margin: 0; padding: 0; }";
+      pg += "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; ";
+      pg += "background: linear-gradient(135deg, #e74c3c, #c0392b); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }";
+      pg += ".container { max-width: 500px; background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); padding: 40px; text-align: center; }";
+      pg += ".error-icon { font-size: 4em; color: #e74c3c; margin-bottom: 20px; }";
+      pg += "h1 { color: #2c3e50; font-size: 2em; margin-bottom: 15px; }";
+      pg += "h3 { color: #e74c3c; font-size: 1.3em; margin-bottom: 20px; }";
+      pg += ".message { color: #555; font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; }";
+      pg += ".btn { background: #3498db; color: white; padding: 12px 24px; border: none; border-radius: 6px; ";
+      pg += "text-decoration: none; display: inline-block; cursor: pointer; }";
+      pg += ".btn:hover { background: #2980b9; }";
+      pg += "</style></head>";
+      pg += "<body><div class=\"container\">";
+      pg += "<div class=\"error-icon\">🔒</div>";
+      pg += "<h1>Access Denied</h1>";
+      pg += "<h3>Security key mismatch</h3>";
+      pg += "<div class=\"message\">The security key you entered does not match. If you've forgotten your key, ";
+      pg += "please re-install the software to reset it.</div>";
+      pg += "<button onclick=\"history.back()\" class=\"btn\">← Go Back</button>";
+      pg += "</div></body></html>";
 
       server.send(400, "text/html", pg);
       return;
@@ -424,13 +440,26 @@ void handlePortal() {
     Serial.println("Configuration saved to internal memory. Please reset the device.");
     wifiInitialized = false;
 
-      pg = "<!doctype html><html lang=\"en\" style=\"background: linear-gradient(90deg, rgba(0,36,3,1) 0%, rgba(13,121,9,1) 35%, rgba(42,200,68,1) 100%);\">";
-      pg += "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Busy Buddy Setup</title>";
-      pg += "<style>h1 {color: yellow;} h2 {color: cyan;} .label {margin-top: 3px;}</style></head>";
-      pg += "<body style=\"background-color: transparent; color: white;\">";
-      pg += "<h1>Busy Buddy Setup</h1><h3>Your settings have been saved successfully!</h3>";
-      pg += "<p>Please restart the device for the changes to take effect.";
-      pg += "</body></html>";
+      pg = "<!doctype html><html lang=\"en\">";
+      pg += "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Busy Buddy Setup - Success</title>";
+      pg += "<style>";
+      pg += "* { box-sizing: border-box; margin: 0; padding: 0; }";
+      pg += "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; ";
+      pg += "background: linear-gradient(135deg, #2ecc71, #27ae60); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }";
+      pg += ".container { max-width: 500px; background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); padding: 40px; text-align: center; }";
+      pg += ".success-icon { font-size: 4em; color: #27ae60; margin-bottom: 20px; }";
+      pg += "h1 { color: #2c3e50; font-size: 2em; margin-bottom: 15px; }";
+      pg += "h3 { color: #27ae60; font-size: 1.3em; margin-bottom: 20px; }";
+      pg += ".message { color: #555; font-size: 1.1em; line-height: 1.6; }";
+      pg += ".restart-note { background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 6px; margin-top: 20px; color: #0c5460; }";
+      pg += "</style></head>";
+      pg += "<body><div class=\"container\">";
+      pg += "<div class=\"success-icon\">✅</div>";
+      pg += "<h1>Configuration Saved!</h1>";
+      pg += "<h3>Your settings have been saved successfully</h3>";
+      pg += "<div class=\"message\">Your Busy Buddy is now configured with your new settings.</div>";
+      pg += "<div class=\"restart-note\"><strong>Next Step:</strong> Please restart your device for the changes to take effect.</div>";
+      pg += "</div></body></html>";
 
   } else {
 
@@ -458,42 +487,67 @@ void handlePortal() {
     // Setup/Configuration page
     Serial.println("Configuration web page requested.");
 
-    pg = "<!doctype html><html lang=\"en\" style=\"background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(42,42,200,1) 100%);\">";
+    pg = "<!doctype html><html lang=\"en\">";
     pg += "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Busy Buddy Setup</title>";
-    pg += "<style>h1 {color: yellow;} h2 {color: cyan;} .label {margin-top: 3px;} select.list1 option.option2 { background-color: lightgreen;}</style></head>";
-    pg += "<body style=\"background-color: transparent; color: white;\"><main><form action=\"/\" method=\"post\">";
-    pg += "<h1>Busy Buddy Setup</h1><p>The following settings allow you to connect Busy Buddy to your ";
-    pg += " local WiFi access point and allow Busy Buddy to listen for API calls from your PresenceLight";
-    pg += " app. Here you can also set a custom DNS name for this device - if you have more than one on ";
-    pg += " the same network, setting a name that is unique to each device will ensure your";
-    pg += " PresenceLight app is talking to the right one. Keep it simple and don't use spaces in the name";
-    pg += " (e.g., BusyBuddy2, BusyBuddy-KR, MyBlinky1, etc.)</p>The Heading Text is the";
-    pg += " message that's displayed on the OLED screen above the status. It can be up to 11 upper-case ";
-    pg += " characters (a couple more if lower-case) or can be blank if you don't want it at all. It is";
-    pg += " set to 'My status is' by default, but if you're using Busy Buddy for something like a DevOps Build ";
-    pg += " indicator, something like 'Last Build:' might be more appropriate.</p>";
-    pg += "<style>.my-checkbox { transform: scale(1.8); margin-right: 11px; margin-top: 12px; margin-left: 6px;}</style>";
-    pg += "<h2>Network Settings</h2>";
-    pg += "<div class=\"label\"><label for=\"ssid\">WiFi SSID: </label></div><div><input id=\"ssid\" name=\"ssid\" type=\"text\" value=\"" + ssid + "\"/></div>";
-    pg += "<div class=\"label\"><label for=\"password\">Password: </label></div><div><input id=\"password\" name=\"password\" type=\"password\" value=\"" + password + "\"/></div>";
-    pg += "<div class=\"label\"><label for=\"dns\">DNS Name: </label></div><div><input id=\"dns\" name=\"dns\" type=\"text\" value=\"" + dns + "\"/></div>";
-    pg += "<h2>Other Settings</h2>";
-    pg += "<div class=\"label\"><label for=\"heading\">Heading Text: </label></div><div><input id=\"heading\" name=\"heading\" type=\"text\" value=\"" + heading + "\"/></div>";
-    pg += "<div class=\"label\"><label for=\"key\">Security Key: </label></div><div><input id=\"key\" name=\"key\" type=\"password\" value=\"" + key + "\"/></div>";
-    pg += "<div><div class=\"label\"><label for=\"ledType\">RGB LED Type: </label></div><div><select id=\"ledType\" class=\"list1\" name=\"ledType\">";
+    pg += "<style>";
+    pg += "* { box-sizing: border-box; margin: 0; padding: 0; }";
+    pg += "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; ";
+    pg += "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }";
+    pg += ".container { max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.95); ";
+    pg += "border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); padding: 30px; }";
+    pg += "h1 { color: #2c3e50; font-size: 2.2em; margin-bottom: 10px; text-align: center; }";
+    pg += "h2 { color: #34495e; font-size: 1.3em; margin: 25px 0 15px 0; padding-bottom: 8px; ";
+    pg += "border-bottom: 2px solid #3498db; }";
+    pg += ".description { color: #555; margin-bottom: 25px; font-size: 0.95em; }";
+    pg += ".form-group { margin-bottom: 20px; }";
+    pg += "label { display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500; }";
+    pg += "input[type='text'], input[type='password'], select { width: 100%; padding: 12px; ";
+    pg += "border: 2px solid #e1e8ed; border-radius: 6px; font-size: 16px; transition: border-color 0.3s; }";
+    pg += "input:focus, select:focus { outline: none; border-color: #3498db; }";
+    pg += "select { background: white; cursor: pointer; }";
+    pg += ".btn { background: linear-gradient(135deg, #3498db, #2980b9); color: white; ";
+    pg += "padding: 14px 30px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; ";
+    pg += "cursor: pointer; transition: transform 0.2s; width: 100%; margin-top: 20px; }";
+    pg += ".btn:hover { transform: translateY(-2px); }";
+    pg += ".security-note { background: #fff3cd; border: 1px solid #ffeaa7; padding: 12px; ";
+    pg += "border-radius: 6px; margin-top: 15px; color: #856404; }";
+    pg += ".restart-note { background: #d1ecf1; border: 1px solid #bee5eb; padding: 12px; ";
+    pg += "border-radius: 6px; margin-top: 20px; color: #0c5460; font-weight: 500; }";
+    pg += "@media (max-width: 480px) { .container { padding: 20px; } h1 { font-size: 1.8em; } }";
+    pg += "</style></head>";
+    pg += "<body><div class=\"container\"><form action=\"/\" method=\"post\">";
+    pg += "<h1>🤖 Busy Buddy Setup</h1>";
+    pg += "<div class=\"description\">Configure your Busy Buddy device to connect to WiFi and customize its behavior. ";
+    pg += "Set a unique DNS name if you have multiple devices, and customize the display text and LED settings.</div>";
+    pg += "<h2>📶 Network Settings</h2>";
+    pg += "<div class=\"form-group\"><label for=\"ssid\">WiFi Network Name (SSID)</label>";
+    pg += "<input id=\"ssid\" name=\"ssid\" type=\"text\" value=\"" + ssid + "\" placeholder=\"Enter your WiFi network name\"/></div>";
+    pg += "<div class=\"form-group\"><label for=\"password\">WiFi Password</label>";
+    pg += "<input id=\"password\" name=\"password\" type=\"password\" value=\"" + password + "\" placeholder=\"Enter your WiFi password\"/></div>";
+    pg += "<div class=\"form-group\"><label for=\"dns\">Device Name</label>";
+    pg += "<input id=\"dns\" name=\"dns\" type=\"text\" value=\"" + dns + "\" placeholder=\"e.g., BusyBuddy, MyDevice\"/></div>";
+    pg += "<h2>⚙️ Display & LED Settings</h2>";
+    pg += "<div class=\"form-group\"><label for=\"heading\">Display Heading Text</label>";
+    pg += "<input id=\"heading\" name=\"heading\" type=\"text\" value=\"" + heading + "\" placeholder=\"e.g., My status is, Build status\"/></div>";
+    pg += "<div class=\"form-group\"><label for=\"key\">Security Key (Optional)</label>";
+    pg += "<input id=\"key\" name=\"key\" type=\"password\" value=\"" + key + "\" placeholder=\"Leave blank for no security\"/></div>";
+    pg += "<div class=\"form-group\"><label for=\"ledType\">RGB LED Type</label>";
+    pg += "<select id=\"ledType\" name=\"ledType\">";
     if(anode) {
       pg += "<option value=\"cathode\">Common Cathode</option>";
-      pg += "<option class=\"option1\" value=\"anode\" selected>Common Anode</option>";
+      pg += "<option value=\"anode\" selected>Common Anode</option>";
     } else {
-      pg += "<option class=\"option1\" value=\"cathode\" selected>Common Cathode</option>";
+      pg += "<option value=\"cathode\" selected>Common Cathode</option>";
       pg += "<option value=\"anode\">Common Anode</option>";
     }
     pg += "</select></div>";
-    pg += "<br/><hr/><br/><button type=\"submit\">Save Changes</button>";
     if(key.length() > 0){
-      pg += "<div class=\"label\"><label for=\"saveKey\" style=\"color:orange;\" >Security Key entry REQUIRED to save: </label><input id=\"saveKey\" name=\"saveKey\" type=\"text\" /></div>";
+      pg += "<div class=\"security-note\"><label for=\"saveKey\">🔐 Enter Security Key to Save Changes</label>";
+      pg += "<input id=\"saveKey\" name=\"saveKey\" type=\"text\" placeholder=\"Enter your current security key\" style=\"margin-top: 8px;\"/></div>";
     }
-    pg += "<br/><b>Always restart Busy Buddy after saving for the changes to take effect.</b></form></main></body></html>";
+    pg += "<button type=\"submit\" class=\"btn\">💾 Save Configuration</button>";
+    pg += "<div class=\"restart-note\">⚠️ <strong>Important:</strong> Always restart your Busy Buddy device after saving changes for them to take effect.</div>";
+    pg += "</form></div></body></html>";
 
   }
 
